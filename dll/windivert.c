@@ -351,7 +351,7 @@ static BOOLEAN WinDivertDriverInstall(VOID)
         NULL, NULL, NULL);
     if (service == NULL)
     {
-        if (GetLastError() == ERROR_SERVICE_EXISTS) 
+        if (GetLastError() == ERROR_SERVICE_EXISTS)
         {
             service = OpenService(manager, WINDIVERT_DEVICE_NAME,
                 SERVICE_ALL_ACCESS);

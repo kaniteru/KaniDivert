@@ -9,25 +9,33 @@ It is not affiliated with or endorsed by the original WinDivert project.
 ## Features
 
 - CMake-based build system
-- Supports both static and shared library builds
+- Supports kernel driver and both static and shared library builds
 - Includes fixes and improvements from other forked repositories
 
 ---
 
 ## Supported platforms
 
-- **MSVC**
-  - x64: tested and working
-  - x86: _not tested_
-- **MinGW**
-  - x64: _not tested_
-  - x86: _not tested_
+- **SYS**
+  - MSVC
+    - x64: tested and working
+    - x86: _not tested_
+
+- **DLL**
+  - MSVC
+    - x64: tested and working
+    - x86: _not tested_
+  - MinGW
+    - x64: _not tested_
+    - x86: _not tested_
 
 ---
 
 ## Installation
 
 ### Using 'FetchContent' in CMake
+
+1. Include and fetch the repository
    ```cmake
    include(FetchContent)
    FetchContent_Declare(
@@ -37,12 +45,20 @@ It is not affiliated with or endorsed by the original WinDivert project.
    )
    FetchContent_MakeAvailable(kanidivert)
    ```
+
+2. Link to your project
    ```cmake
    target_link_libraries(your_project PRIVATE KaniDivert::shared)
    ```
    or
    ```cmake
    target_link_libraries(your_project PRIVATE KaniDivert::static)
+   ```
+
+3. (Optional) Download official WinDivert driver files
+   ```cmake
+   # Downloads the official .sys driver files on post build
+   download_official_sys(your_project "${download_path}")
    ```
 
 ### Using prebuilt binaries
@@ -57,5 +73,7 @@ KaniDivert follows the same dual-license terms as the original [WinDivert](https
 
 - GNU Lesser General Public License (LGPL) v3, or
 - GNU General Public License (GPL) v2
+
+This project also uses FindWDK (BSD 3-Clause License) for build system integration.
 
 Please refer to the [LICENSE](./LICENSE) file for full details.
