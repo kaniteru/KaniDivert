@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## v250629
+
+### Fixed
+- Fixed stack overflow in release builds with long filter strings caused by compiler options
+```
+I'm not certain whether this fix is correct, as I lack detailed knowledge of compiler flags.
+
+It might require future revision, considering the noticeable size difference (80 KB in my case) compared to the original WinDivert DLL.
+```
+
+### Changed sources
+- include/windivert.h
+```
+Removed 'extern' keyword from WINDIVERTSTATIC
+```
+
+---
+
 ## v250624
 
 ### Added
