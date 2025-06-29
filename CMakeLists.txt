@@ -29,12 +29,23 @@ if(MSVC)
     string(REPLACE "/RTC1" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
     string(REPLACE "/RTCs" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
     string(REPLACE "/RTCu" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+    set(CMAKE_C_FLAGS_RELEASE "")
     target_compile_options(KaniDivert_obj PRIVATE
-            /W3 /Os /Oi /GS- /WX- /GR- /EHs-c- /fp:fast
+            /W3 /GS- /WX- /GR- /EHs-c-
+            $<$<CONFIG:Debug>: /Od /Zi>
+            $<$<CONFIG:Release>: /Os /Oi /GL /Gy /GF /fp:fast /Ob2>
+    )
+    target_link_options(KaniDivert_obj PRIVATE
+            $<$<CONFIG:Release>:/LTCG>
     )
 elseif(MINGW)
+    set(CMAKE_C_FLAGS_DEBUG "-Og -g")
+    set(CMAKE_C_FLAGS_RELEASE "")
     target_compile_options(KaniDivert_obj PRIVATE
-            -fno-ident -Wall -Wno-pointer-to-int-cast -Os
+            #[[-fno-ident -Wall -Wno-pointer-to-int-cast -fno-stack-protector -ffast-math -Os]]
+            -fno-ident -Wall -Wno-pointer-to-int-cast -fno-stack-protector
+            $<$<CONFIG:Debug>: -Og -g>
+            $<$<CONFIG:Release>: -Os -ffast-math>
     )
 else()
     message(FATAL_ERROR "[KaniDivert] Unsupported compiler. Only MSVC and MinGW are supported.")
