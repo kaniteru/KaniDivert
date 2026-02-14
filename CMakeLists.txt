@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18)
-project(KaniDivert LANGUAGES C)
+project(kanidivert LANGUAGES C)
 
 include(FetchContent)
 
@@ -16,9 +16,9 @@ set(INC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(DLL_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dll)
 set(DLL_SRC_FILES ${DLL_SRC_DIR}/windivert.c)
 
-add_library(KaniDivert_obj OBJECT ${DLL_SRC_FILES})
-target_include_directories(KaniDivert_obj PUBLIC ${INC_DIR})
-target_compile_definitions(KaniDivert_obj PRIVATE
+add_library(kanidivert_obj OBJECT ${DLL_SRC_FILES})
+target_include_directories(kanidivert_obj PUBLIC ${INC_DIR})
+target_compile_definitions(kanidivert_obj PRIVATE
         WIN32
         _WINDOWS
         $<$<CONFIG:Debug>:DEBUG;_DEBUG>
@@ -30,18 +30,18 @@ if(MSVC)
     string(REPLACE "/RTCs" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
     string(REPLACE "/RTCu" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
     set(CMAKE_C_FLAGS_RELEASE "")
-    target_compile_options(KaniDivert_obj PRIVATE
+    target_compile_options(kanidivert_obj PRIVATE
             /W3 /GS- /WX- /GR- /EHs-c-
             $<$<CONFIG:Debug>: /Od /Zi>
             $<$<CONFIG:Release>: /Os /Oi /GL /Gy /GF /fp:fast /Ob2>
     )
-    target_link_options(KaniDivert_obj PRIVATE
+    target_link_options(kanidivert_obj PRIVATE
             $<$<CONFIG:Release>:/LTCG>
     )
 elseif(MINGW)
     set(CMAKE_C_FLAGS_DEBUG "-Og -g")
     set(CMAKE_C_FLAGS_RELEASE "")
-    target_compile_options(KaniDivert_obj PRIVATE
+    target_compile_options(kanidivert_obj PRIVATE
             #[[-fno-ident -Wall -Wno-pointer-to-int-cast -fno-stack-protector -ffast-math -Os]]
             -fno-ident -Wall -Wno-pointer-to-int-cast -fno-stack-protector
             $<$<CONFIG:Debug>: -Og -g>
@@ -54,20 +54,20 @@ endif()
 
 
 # =============== static ===============
-add_library(KaniDivert_static STATIC $<TARGET_OBJECTS:KaniDivert_obj>)
-set_target_properties(KaniDivert_static PROPERTIES
+add_library(kanidivert_static STATIC $<TARGET_OBJECTS:kanidivert_obj>)
+set_target_properties(kanidivert_static PROPERTIES
         POSITION_INDEPENDENT_CODE ON
         PREFIX ""
         OUTPUT_NAME "WinDivert_static"
 )
-target_include_directories(KaniDivert_static PUBLIC
+target_include_directories(kanidivert_static PUBLIC
         $<BUILD_INTERFACE:${INC_DIR}>
         $<INSTALL_INTERFACE:include>
 )
-target_compile_definitions(KaniDivert_static PUBLIC
+target_compile_definitions(kanidivert_static PUBLIC
         WINDIVERTSTATIC
 )
-add_library(KaniDivert::static ALIAS KaniDivert_static)
+add_library(kanidivert::static ALIAS kanidivert_static)
 # ====================================== static
 
 
@@ -75,26 +75,26 @@ add_library(KaniDivert::static ALIAS KaniDivert_static)
 set(DLL_ENTRY_POINT "WinDivertDllEntry")
 set(DLL_EXPORT_DEF_FILE ${CMAKE_CURRENT_SOURCE_DIR}/dll/windivert.def)
 
-add_library(KaniDivert_shared SHARED $<TARGET_OBJECTS:KaniDivert_obj>)
-set_target_properties(KaniDivert_shared PROPERTIES
+add_library(kanidivert_shared SHARED $<TARGET_OBJECTS:kanidivert_obj>)
+set_target_properties(kanidivert_shared PROPERTIES
         POSITION_INDEPENDENT_CODE ON
         PREFIX ""
         OUTPUT_NAME "WinDivert"
 )
-target_include_directories(KaniDivert_shared PUBLIC
+target_include_directories(kanidivert_shared PUBLIC
         $<BUILD_INTERFACE:${INC_DIR}>
         $<INSTALL_INTERFACE:include>
 )
-target_compile_definitions(KaniDivert_shared PRIVATE
+target_compile_definitions(kanidivert_shared PRIVATE
         _USRDLL
         DLL_EXPORTS
         WINDIVERTEXPORTS
 )
-add_library(KaniDivert::shared ALIAS KaniDivert_shared)
+add_library(kanidivert::shared ALIAS kanidivert_shared)
 
 if(MSVC)
-    target_sources(KaniDivert_shared PRIVATE ${DLL_EXPORT_DEF_FILE})
-    target_link_options(KaniDivert_shared PRIVATE
+    target_sources(kanidivert_shared PRIVATE ${DLL_EXPORT_DEF_FILE})
+    target_link_options(kanidivert_shared PRIVATE
             /ENTRY:${DLL_ENTRY_POINT}
             /NODEFAULTLIB
             /SUBSYSTEM:WINDOWS
@@ -104,21 +104,21 @@ if(MSVC)
             /OPT:ICF
     )
 elseif(MINGW)
-    target_link_options(KaniDivert_shared PRIVATE
+    target_link_options(kanidivert_shared PRIVATE
             -shared
             -Wl,--enable-stdcall-fixup
             -Wl,--entry=${DLL_ENTRY_POINT}
             -nostdlib
     )
-    target_link_libraries(KaniDivert_shared kernel32 advapi32)
+    target_link_libraries(kanidivert_shared kernel32 advapi32)
 
     find_program(DLLTOOL_EXECUTABLE NAMES ${CMAKE_C_COMPILER_TARGET}-dlltool dlltool)
     if(DLLTOOL_EXECUTABLE)
-        add_custom_command(TARGET KaniDivert_shared POST_BUILD
+        add_custom_command(TARGET kanidivert_shared POST_BUILD
                 COMMAND ${DLLTOOL_EXECUTABLE}
-                --dllname $<TARGET_FILE_NAME:KaniDivert_shared>
+                --dllname $<TARGET_FILE_NAME:kanidivert_shared>
                 --def ${DLL_EXPORT_DEF_FILE}
-                --output-lib $<TARGET_FILE_DIR:KaniDivert_shared>/WinDivert.lib
+                --output-lib $<TARGET_FILE_DIR:kanidivert_shared>/WinDivert.lib
                 COMMENT "Generating import library"
         )
     else()
@@ -128,8 +128,8 @@ elseif(MINGW)
     if(CMAKE_BUILD_TYPE MATCHES "^[Rr][Ee][Ll][Ee][Aa][Ss][Ee]$")
         find_program(STRIP_EXECUTABLE NAMES ${CMAKE_C_COMPILER_TARGET}-strip strip)
         if(STRIP_EXECUTABLE)
-            add_custom_command(TARGET KaniDivert_shared POST_BUILD
-                    COMMAND ${STRIP_EXECUTABLE} $<TARGET_FILE:KaniDivert_shared>
+            add_custom_command(TARGET kanidivert_shared POST_BUILD
+                    COMMAND ${STRIP_EXECUTABLE} $<TARGET_FILE:kanidivert_shared>
                     COMMENT "Stripping symbols from DLL"
             )
         else()
@@ -143,7 +143,7 @@ endif()
 # =============== driver ===============
 FetchContent_Declare(
         FindWDK
-        GIT_REPOSITORY https://github.com/SergiusTheBest/FindWDK.git
+        GIT_REPOSITORY https://github.com/kaniteru/FindWDK.git
 )
 FetchContent_MakeAvailable(FindWDK)
 list(APPEND CMAKE_MODULE_PATH "${findwdk_SOURCE_DIR}/cmake")
@@ -169,15 +169,15 @@ if (WDK_FOUND)
             ${SYS_MC_HDR_FILE}
     )
 
-    wdk_add_driver(KaniDivert_driver KMDF 1.15 ${SYS_SRC_FILES})
-    target_sources(KaniDivert_driver PRIVATE ${SYS_SRC_DIR}/windivert.rc)
-    target_include_directories(KaniDivert_driver PRIVATE
+    wdk_add_driver(kanidivert_driver KMDF 1.15 ${SYS_SRC_FILES})
+    target_sources(kanidivert_driver PRIVATE ${SYS_SRC_DIR}/windivert.rc)
+    target_include_directories(kanidivert_driver PRIVATE
             ${INC_DIR} ${DLL_SRC_DIR} ${SYS_GEN_DIR}
     )
-    target_link_libraries(KaniDivert_driver
+    target_link_libraries(kanidivert_driver
             WDK::NDIS WDK::FWPKCLNT WDK::WDMSEC uuid
     )
-    target_compile_definitions(KaniDivert_driver PRIVATE
+    target_compile_definitions(kanidivert_driver PRIVATE
             UNICODE _UNICODE
             NDIS60 NDIS_SUPPORT_NDIS60
             BINARY_COMPATIBLE=0
@@ -185,9 +185,9 @@ if (WDK_FOUND)
     )
 
     if(${WDK_PLATFORM} STREQUAL "x64")
-        set_target_properties(KaniDivert_driver PROPERTIES OUTPUT_NAME "WinDivert64")
+        set_target_properties(kanidivert_driver PROPERTIES OUTPUT_NAME "WinDivert64")
     elseif(${WDK_PLATFORM} STREQUAL "x86")
-        set_target_properties(KaniDivert_driver PROPERTIES OUTPUT_NAME "WinDivert32")
+        set_target_properties(kanidivert_driver PROPERTIES OUTPUT_NAME "WinDivert32")
     endif()
 else()
     message(STATUS "[KaniDivert] WDK not found - skipping driver build")
@@ -195,9 +195,9 @@ endif()
 # ====================================== driver
 
 
-function(download_official_sys target_proj destination_dir)
+function(download_windivert_sys target_proj destination_dir)
     if(NOT destination_dir)
-        message(FATAL_ERROR "[WinDivert::download_official_sys] destination_dir is required")
+        message(FATAL_ERROR "[KaniDivert::download_windivert_sys] destination_dir is required")
     endif()
 
     FetchContent_Declare(
@@ -206,6 +206,9 @@ function(download_official_sys target_proj destination_dir)
             DOWNLOAD_EXTRACT_TIMESTAMP true
     )
     FetchContent_MakeAvailable(windivert_official)
+    if(NOT windivert_official_POPULATED)
+        message(FATAL_ERROR "[KaniDivert::download_windivert_sys] Failed to download WinDivert sys files")
+    endif()
 
     file(MAKE_DIRECTORY "${destination_dir}")
     add_custom_command(TARGET ${target_proj} POST_BUILD
@@ -216,6 +219,5 @@ function(download_official_sys target_proj destination_dir)
             "${windivert_official_SOURCE_DIR}/x86/WinDivert32.sys"
             "${destination_dir}/WinDivert32.sys"
     )
-
-    message(STATUS "[WinDivert::download_official_sys] Will copy .sys files to ${destination_dir}")
+    message(STATUS "[KaniDivert::download_windivert_sys] Will copy .sys files to ${destination_dir}")
 endfunction()

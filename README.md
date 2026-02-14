@@ -2,8 +2,6 @@
 
 KaniDivert is a personal fork of [WinDivert](https://github.com/basil00/WinDivert).
 
-It is not affiliated with or endorsed by the original WinDivert project.
-
 ---
 
 ## Features
@@ -48,22 +46,23 @@ It is not affiliated with or endorsed by the original WinDivert project.
 
 2. Link to your project
    ```cmake
-   target_link_libraries(your_project PRIVATE KaniDivert::shared)
+   target_link_libraries(your_project PRIVATE kanidivert::shared)
    ```
    or
    ```cmake
-   target_link_libraries(your_project PRIVATE KaniDivert::static)
+   target_link_libraries(your_project PRIVATE kanidivert::static)
    ```
 
 3. (Optional) Download official WinDivert driver files
    ```cmake
    # Downloads the official .sys driver files on post build
-   download_official_sys(your_project "${download_path}")
+   download_windivert_sys(your_project "dest_dir")
    ```
 
 ### Using prebuilt binaries
 1. Download prebuilt binaries from the [Releases](https://github.com/kaniteru/KaniDivert/releases) page.
-2. If you're using the static library, make sure to define **WINDIVERTSTATIC** in your compiler flags.
+2. If you're using the static library, make sure to define ```WINDIVERTSTATIC``` in your compiler flags.
+3. (Optional) [Download](https://github.com/basil00/WinDivert/releases) official WinDivert driver files.
 
 ---
 
@@ -74,6 +73,6 @@ KaniDivert follows the same dual-license terms as the original [WinDivert](https
 - GNU Lesser General Public License (LGPL) v3, or
 - GNU General Public License (GPL) v2
 
-This project also uses FindWDK (BSD 3-Clause License) for build system integration.
+This project also uses [FindWDK](https://github.com/kaniteru/FindWDK) (BSD 3-Clause License) for build system integration.
 
 Please refer to the [LICENSE](./LICENSE) file for full details.
